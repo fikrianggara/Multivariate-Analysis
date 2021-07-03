@@ -1,0 +1,91 @@
+---
+title: "cluster analysis"
+author: "Fikri Septrian Anggara"
+date: "6/16/2021"
+output:
+  html_document: default
+  word_document: default
+---
+### lakukan analisis cluster dari data crime.csv
+#### algoritma untuk membangun klaster yang digunakan ialah k-means
+```{r}
+library(readr)
+library(psych)
+library(factoextra)
+library(NbClust)
+library(dplyr)
+library(fpc)
+crime <- read_csv("crime.csv")
+head(crime)
+```
+
+```{r}
+datpert10<-crime[,-c(1,9)] # menghilangkan atribut nama kota dan type
+str(datpert10)
+pairs.panels(datpert10) #melihat korelasi dan persebaran antar atribut
+
+datpert10<-scale(datpert10)
+datpert10<-as.data.frame(datpert10)
+```
+```{r}
+#menentukan jumlah klaster
+set.seed(123)
+# metode elbow
+fviz_nbclust(datpert10, kmeans, method='wss') + labs(subtitle='metode
+Elbow')
+# metode silhouette
+fviz_nbclust(datpert10, kmeans, method='silhouette') + labs(subtitle='metode
+silhouette')
+# metode gap statistik
+fviz_nbclust(datpert10, kmeans, method='gap_stat', nstart=25, nboot=500) +
+labs(subtitle='metode gap statistik nboot=50')
+fviz_nbclust(datpert10, kmeans, method='gap_stat', nstart=25, nboot=50) +
+labs(subtitle='metode gap statistik nboot=50')
+```
+```{r}
+# membangun klaster
+km2<-eclust(datpert10, 'kmeans', k=2, nstart = 25)
+```
+
+```{r}
+# validasi klaster
+require('cluster')
+sil2<-silhouette(km2$cluster, dist(datpert10))
+fviz_silhouette(sil2)
+```
+interpretasi dari 9 variabel yang ada, hanya 7 variabel yang digunakan, terlihat terdapat beberapa variabel yang berkorelasi cukup besar (>0,5). berdasarkan metode elbow, dan silhouette, banyak klaster yang digunakan adalah 2 klaster, sementara dengan metode gap statistik, direkomendasikan menggunakan 1 klaster. diputuskan untuk menggunakan 2 klaster. dari plot silhouette, terlihat bahwa terdapat satu observasi yang memiliki nilai silhouette lebih kecil dari 0, yang artinya observasi ini kemungkinan berada di klaster yang salah. nilai rata-rata silhouette kedua klaster kurang lebih 0,4, artinya pengelompokkan klaster cenderung baik namun masih terdapat ketidakpastian peletakkan observasi ke dalam klaster.
+
+```{r}
+#menghilangkan observasi pencilan
+datpert10_8<-datpert10[-8,]
+```
+
+```{r}
+#menentukan jumlah klaster
+set.seed(123)
+# metode elbow
+fviz_nbclust(datpert10_8, kmeans, method='wss') + labs(subtitle='metode
+Elbow')
+# metode silhouette
+fviz_nbclust(datpert10_8, kmeans, method='silhouette') + labs(subtitle='metode
+silhouette')
+# metode gap statistik
+fviz_nbclust(datpert10_8, kmeans, method='gap_stat', nstart=25, nboot=500) +
+labs(subtitle='metode gap statistik nboot=50')
+fviz_nbclust(datpert10_8, kmeans, method='gap_stat', nstart=25, nboot=50) +
+labs(subtitle='metode gap statistik nboot=50')
+```
+```{r}
+# membangun klaster
+km2<-eclust(datpert10_8, 'kmeans', k=2, nstart = 25)
+```
+
+
+```{r}
+# validasi klaster
+require('cluster')
+sil2<-silhouette(km2$cluster, dist(datpert10_8))
+fviz_silhouette(sil2)
+```
+
+interpretasi: setelah menghilangkan observasi pencilan, peningkatan rata-rata silhouette hanya 0,005 dari 0,385 menjadi 0,39. selain itu terdapat satu observasi lagi yang memiliki nilai silhouette lebih kecil dari 0, artinya setelah menghilangkan satu observasi dengan harapan pengelompokkan menjadi lebih baik, ternyata tidak terlalu mengubah kebaikan pengelompokkan tersebut.
