@@ -1,6 +1,6 @@
 # Multivariate-Analysis
-Kumpulan program yang mengimplementasikan metode-metode analisis peubah ganda. seluruh kode dibuat menggunakan bahasa pemrograman R.
-metode yang diimplementasikan yaitu :
+Source code written in R to implement multivariate analysis methods.
+Covering  :
   - Principal Component Analysis
   - Factor Analysis
   - Cluster Analysis
